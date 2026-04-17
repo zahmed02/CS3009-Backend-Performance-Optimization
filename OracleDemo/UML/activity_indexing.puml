@@ -1,0 +1,32 @@
+@startuml
+!theme plain
+title Activity Diagram – Database Indexing Impact Analysis
+
+start
+
+:User calls /slow endpoint;
+:Query: LIKE '%a%' (leading wildcard);
+:Database cannot use index;
+:Full table scan;
+:Measure execution time (e.g., 300+ ms);
+:Return result with timeMs;
+
+fork
+   :User calls /fast endpoint;
+   :Query: LIKE 'A%' (prefix);
+   :Database uses index on ProductName;
+   :Index range scan;
+   :Measure execution time (e.g., <50 ms);
+   :Return result with timeMs;
+fork again
+   :User calls /benchmark?iterations=10;
+   :Run slow query 10 times;
+   :Run fast query 10 times;
+   :Calculate average, min, max;
+   :Compute improvement percentage;
+   :Return statistics;
+endfork
+
+:Compare results – fast is 80-90% faster;
+stop
+@enduml

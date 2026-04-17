@@ -1,0 +1,39 @@
+@startuml
+!theme plain
+title Sequence Diagram – Async vs Sync (Load Test)
+
+actor "User" as user
+participant "AsyncVsSyncController" as controller
+participant "Thread Pool (async)" as asyncPool
+participant "Thread (sync)" as syncThread
+
+user -> controller: GET /load-test?requests=5&useAsync=true
+activate controller
+
+loop 5 times
+    controller -> asyncPool: Task.Delay(500)
+    activate asyncPool
+    asyncPool --> controller: (returns immediately)
+    deactivate asyncPool
+    note right of asyncPool: Non‑blocking: thread freed
+end
+
+controller -> asyncPool: Task.WhenAll(tasks)
+asyncPool --> controller: all complete (~500ms total)
+controller --> user: { totalTimeMs: ~500, mode: "Asynchronous" }
+deactivate controller
+
+user -> controller: GET /load-test?requests=5&useAsync=false
+activate controller
+
+loop 5 times
+    controller -> syncThread: Thread.Sleep(500)
+    activate syncThread
+    syncThread --> controller: (blocks 500ms)
+    deactivate syncThread
+    note right of syncThread: Blocking: thread held
+end
+
+controller --> user: { totalTimeMs: ~2500, mode: "Synchronous" }
+deactivate controller
+@enduml
