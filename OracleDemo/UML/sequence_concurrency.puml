@@ -1,0 +1,61 @@
+@startuml
+!theme plain
+title Sequence Diagram – Concurrency Handling (Simulate Race)
+
+actor "User" as user
+participant "ConcurrencyDemoController" as controller
+participant "IServiceScopeFactory" as factory
+participant "AppDbContext (User A)" as dbA
+participant "AppDbContext (User B)" as dbB
+database "Oracle Database" as db
+
+user -> controller: POST /simulate-race
+activate controller
+
+controller -> db: FirstOrDefaultAsync()
+db --> controller: product (RowVersion = 0)
+
+controller -> factory: CreateScope()
+factory --> controller: scopeA
+controller -> dbA: new scope (User A)
+controller -> factory: CreateScope()
+factory --> controller: scopeB
+controller -> dbB: new scope (User B)
+
+par User A update
+    controller -> dbA: FindAsync(id)
+    dbA --> controller: product (RowVersion=0)
+    controller -> dbA: ProductName = "Updated by A"
+    controller -> dbA: RowVersion++
+    controller -> dbA: SaveChangesAsync()
+    dbA -> db: UPDATE ... WHERE RowVersion=0
+    alt success
+        db --> dbA: 1 row updated
+        dbA --> controller: success
+    else conflict (if other updated first)
+        db --> dbA: 0 rows updated
+        dbA --> controller: DbUpdateConcurrencyException
+    end
+    controller --> user: "User A: succeeded/failed"
+end
+
+par User B update
+    controller -> dbB: FindAsync(id)
+    dbB --> controller: product (RowVersion=0)
+    controller -> dbB: ProductName = "Updated by B"
+    controller -> dbB: RowVersion++
+    controller -> dbB: SaveChangesAsync()
+    dbB -> db: UPDATE ... WHERE RowVersion=0
+    alt success
+        db --> dbB: 1 row updated
+        dbB --> controller: success
+    else conflict
+        db --> dbB: 0 rows updated
+        dbB --> controller: DbUpdateConcurrencyException
+    end
+    controller --> user: "User B: succeeded/failed"
+end
+
+controller --> user: { userA: "...", userB: "..." }
+deactivate controller
+@enduml

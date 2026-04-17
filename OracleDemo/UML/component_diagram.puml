@@ -1,0 +1,55 @@
+@startuml
+!theme plain
+title Component Diagram – High Level Architecture
+
+package "ASP.NET Core Web API" {
+    [Controllers] as Ctrl
+    [Repositories] as Repo
+    [Strategies] as Strat
+    [Services] as Svc
+    [Entity Framework Core] as EF
+}
+
+database "Oracle Database 21c XE" as DB
+
+[Thunder Client] as Client
+[Swagger UI] as Swagger
+
+Client --> Ctrl : HTTP requests
+Swagger --> Ctrl : HTTP requests
+
+Ctrl --> Repo : uses
+Ctrl --> Strat : uses
+Ctrl --> Svc : uses
+
+Repo --> EF : calls
+Strat --> EF : calls
+Svc --> (no DB)
+
+EF --> DB : SQL queries
+
+note right of Ctrl
+  Controllers:
+  - ProductsController
+  - IndexingDemoController
+  - QueryOptimizationController
+  - ConcurrencyDemoController
+  - AsyncVsSyncController
+end note
+
+note right of Repo
+  Repository Pattern
+  IProductRepository / ProductRepository
+end note
+
+note right of Strat
+  Strategy Pattern
+  Indexed / NonIndexed / RawSql
+end note
+
+note right of Svc
+  Singleton Pattern
+  BenchmarkService
+end note
+
+@enduml

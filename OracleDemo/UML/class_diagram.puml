@@ -1,0 +1,118 @@
+@startuml
+!theme plain
+title Class Diagram – Overall Architecture & Design Patterns
+
+' --- Repository Pattern ---
+interface IProductRepository {
+    + GetAllAsync(): Task<IEnumerable<Product>>
+    + GetByIdAsync(id: int): Task<Product?>
+    + AddAsync(product: Product): Task<Product>
+    + UpdateAsync(product: Product): Task
+    + DeleteAsync(id: int): Task
+}
+
+class ProductRepository {
+    - _context: AppDbContext
+    + ProductRepository(context: AppDbContext)
+    + GetAllAsync(): Task<IEnumerable<Product>>
+    + GetByIdAsync(id: int): Task<Product?>
+    + AddAsync(product: Product): Task<Product>
+    + UpdateAsync(product: Product): Task
+    + DeleteAsync(id: int): Task
+}
+ProductRepository ..|> IProductRepository
+ProductRepository --> AppDbContext
+
+' --- Strategy Pattern ---
+interface IQueryStrategy {
+    + ExecuteAsync(context: AppDbContext): Task<List<Product>>
+}
+
+class IndexedQueryStrategy {
+    + ExecuteAsync(context: AppDbContext): Task<List<Product>>
+}
+class NonIndexedQueryStrategy {
+    + ExecuteAsync(context: AppDbContext): Task<List<Product>>
+}
+class RawSqlQueryStrategy {
+    + ExecuteAsync(context: AppDbContext): Task<List<Product>>
+}
+IndexedQueryStrategy ..|> IQueryStrategy
+NonIndexedQueryStrategy ..|> IQueryStrategy
+RawSqlQueryStrategy ..|> IQueryStrategy
+
+' --- Singleton Pattern ---
+class BenchmarkService {
+    - static Instance: BenchmarkService
+    - _measurements: ConcurrentDictionary<string, List<long>>
+    - BenchmarkService()
+    + RecordMeasurement(testName: string, milliseconds: long): void
+    + GetSummary(): Dictionary<string, object>
+    + Clear(): void
+}
+note right of BenchmarkService::Instance
+  Singleton: only one instance
+  shared across the whole app
+end note
+
+' --- Controllers ---
+class ProductsController {
+    - _productRepository: IProductRepository
+    + ProductsController(repo: IProductRepository)
+    + GetProducts(): Task<IActionResult>
+    + GetProduct(id: int): Task<IActionResult>
+    + PostProduct(product: Product): Task<IActionResult>
+    + PutProduct(id: int, product: Product): Task<IActionResult>
+    + DeleteProduct(id: int): Task<IActionResult>
+}
+ProductsController --> IProductRepository
+
+class IndexingDemoController {
+    - _context: AppDbContext
+    - _serviceProvider: IServiceProvider
+    - _benchmarkService: BenchmarkService
+    + IndexingDemoController(...)
+    + GetProductsSlow(): Task<IActionResult>
+    + GetProductsFast(): Task<IActionResult>
+    + Benchmark(iterations: int): Task<IActionResult>
+    + ExecuteStrategy(strategyName: string): Task<IActionResult>
+    + GenerateTestData(count: int): Task<IActionResult>
+    + GetBenchmarkSummary(): IActionResult
+}
+IndexingDemoController --> AppDbContext
+IndexingDemoController --> BenchmarkService
+IndexingDemoController --> IQueryStrategy : uses
+
+class ConcurrencyDemoController {
+    - _context: AppDbContext
+    - _scopeFactory: IServiceScopeFactory
+    + ConcurrencyDemoController(...)
+    + GetProduct(id: int): Task<ActionResult<Product>>
+    + UpdateProduct(id: int, updatedProduct: Product): Task<IActionResult>
+    + SimulateRace(): Task<IActionResult>
+}
+ConcurrencyDemoController --> AppDbContext
+
+class AsyncVsSyncController {
+    + SyncIO(): IActionResult
+    + AsyncIO(): Task<IActionResult>
+    + ParallelAsync(count: int): Task<IActionResult>
+    + ParallelSync(count: int): IActionResult
+    + CpuBoundSync(): IActionResult
+    + CpuBoundAsync(): Task<IActionResult>
+    + LoadTest(requests: int, useAsync: bool): Task<IActionResult>
+}
+' No dependencies – pure logic
+
+' --- Entity Model ---
+class Product {
+    + ProductId: int
+    + ProductName: string?
+    + Price: decimal
+    + CreatedDate: DateTime
+    + RowVersion: long
+}
+
+AppDbContext --> Product
+
+@enduml

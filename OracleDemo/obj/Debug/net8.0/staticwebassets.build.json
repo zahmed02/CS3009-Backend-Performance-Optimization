@@ -1,0 +1,19 @@
+{
+  "Version": 1,
+  "Hash": "74BI0t/FXPEHn74117BATZ+YscfjturUI+LCFtvKfhQ=",
+  "Source": "OracleDemo",
+  "BasePath": "_content/OracleDemo",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "OracleDemo\\wwwroot",
+      "Source": "OracleDemo",
+      "ContentRoot": "D:\\DevTools\\dotnet-projects\\OracleDemo\\wwwroot\\",
+      "BasePath": "_content/OracleDemo",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": []
+}
