@@ -1,6 +1,7 @@
 
 # CS3009 Backend Performance Optimization
-## Course Instructor & Project Supervisor: Dr. Sobia Iftikhar
+## Course: CS3009 Software Engineering
+## Instructor & Project Supervisor: Dr. Sobia Iftikhar
 ## Semester & Section: BS(CS)-6A (SP26)
 
 ## Project Description:
