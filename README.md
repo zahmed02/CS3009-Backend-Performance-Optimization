@@ -156,17 +156,12 @@ All endpoints are under `http://localhost:8080/api/`
 
 ### Concurrency Handling (Optimistic)
 
-| Method | Endpoint                              | Description                                         |Supporting Info                                        |Supporting Info                                        |
-|--------|---------------------------------------|-----------------------------------------------------|                                       |Supporting Info                                        |
-| GET    | `/api/concurrencydemo/{id}`           | Fetch product (includes current rowVersion)        |                                        |Supporting Info                                        |
-| PUT    | `/api/concurrencydemo/{id}`           | Update – checks rowVersion, increments on success  |Content-Type: application/json|      {
-       "productId": 279,
-       "productName": "Updated By A",
-       "price": 1999.99,
-       "createdDate": "2026-04-15T09:22:12",
-       "rowVersion": 0
-     } |
-| POST   | `/api/concurrencydemo/simulate-race`  | Simulates two concurrent updates (one wins)        |                                          |Supporting Info                                        |
+| Method | Endpoint | Description | Headers / Supporting Info | JSON Body Example |
+|--------|----------|-------------|---------------------------|-------------------|
+| GET | `/api/concurrencydemo/{id}` | Fetch product (includes current rowVersion) | None needed | (No body) |
+| PUT | `/api/concurrencydemo/{id}` | Update – checks rowVersion, increments on success | `Content-Type: application/json` | `{"productId": {id}, "productName": "Updated By A", "price": 1999.99, "createdDate": "2026-04-15T09:22:12", "rowVersion": 0}` |
+| PUT | `/api/concurrencydemo/{id}` | Second concurrent update (simulates race condition) | `Content-Type: application/json` | `{"productId": {id}, "productName": "Updated By B", "price": 1999.99, "createdDate": "2026-04-15T09:22:12", "rowVersion": 0}` |
+| POST | `/api/concurrencydemo/simulate-race` | Simulates two concurrent updates automatically (one wins, one fails) | None needed | (No body) |
 
 ### Async vs Multithreading
 
