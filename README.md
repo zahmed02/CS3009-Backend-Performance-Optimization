@@ -1,12 +1,15 @@
 
-# Backend Performance Optimization for Web Applications
+# CS3009 Backend Performance Optimization 
 
+# Course Instructor & Project Supervisor: Dr. Sobia Iftikhar
+
+# Description:
 **ASP.NET Core 8 Web API** demonstrating four key backend optimization techniques using **Entity Framework Core** and **Oracle Database 21c XE**.
 
-- **Database Indexing Impact Analysis** – compare indexed vs non‑indexed queries.
-- **Query Optimization Benchmarking** – projection, tracking, raw SQL, and `LIKE` vs `Contains`.
-- **Concurrency Handling** – optimistic concurrency with row versioning.
-- **Multithreading vs Asynchronous Processing** – sync/async I/O, parallel tasks, CPU‑bound offloading.
+- **Database Indexing Impact Analysis**: compare indexed vs non‑indexed queries.
+- **Query Optimization Benchmarking**: projection, tracking, raw SQL, and `LIKE` vs `Contains`.
+- **Concurrency Handling**: optimistic concurrency with row versioning.
+- **Multithreading vs Asynchronous Processing**: sync/async I/O, parallel tasks, CPU‑bound offloading.
 
 ## Tech Stack
 
@@ -39,15 +42,15 @@ OracleDemo/
 
 ## Prerequisites
 
-- **.NET SDK 8.0** – installed on `D:\DevTools\dotnet` (or your preferred location)
-- **Oracle Database 21c XE** – running with service name `XEPDB1`, user `zubair` / password `abc123`
+- **.NET SDK 8.0**: installed on `D:\DevTools\dotnet` (or your preferred location)
+- **Oracle Database 21c XE**: running with service name `XEPDB1`, user `zubair` / password `abc123`
 - **Visual Studio Code** with extensions:
   - C# Dev Kit
   - Oracle Developer Tools for VS Code (for DB browsing)
   - Thunder Client (optional, for manual testing)
-- **Node.js** (v20+) – only for building the frontend
+- **Node.js** (v20+): only for building the frontend
 
-> **Environment variables** (set in Windows User variables):
+> **Environment variables** (set in Windows User variables)
 > - `DOTNET_ROOT` → `D:\DevTools\dotnet`
 > - `DOTNET_TOOLS_DIR` → `D:\DevTools\dotnet-tools`
 > - `NUGET_PACKAGES` → `D:\DevTools\dotnet\.nuget\packages`
@@ -64,7 +67,7 @@ cd CS3009-Backend-Performance-Optimization/OracleDemo
 
 ### 2. Configure the Database Connection
 
-Edit `appsettings.json` – update the connection string if your Oracle credentials differ:
+Edit `appsettings.json`: update the connection string if your Oracle credentials differ:
 
 ```json
 "ConnectionStrings": {
@@ -127,7 +130,7 @@ Use **Thunder Client** (VS Code extension) or **Swagger** to call the endpoints 
 
 All endpoints are under `http://localhost:8080/api/`
 
-### Products (CRUD) – Repository Pattern
+### Products (CRUD): Repository Pattern
 
 | Method | Endpoint                     | Description                    |
 |--------|------------------------------|--------------------------------|
@@ -204,20 +207,5 @@ The frontend is a **static Next.js** application (TypeScript, Tailwind CSS). Aft
 
 To modify the frontend, edit the files in `frontend/app` and rebuild.
 
-## License
-
-This project is licensed under the **MIT License** – see the `LICENSE` file in the repository root.
-
-## Acknowledgments
-
-- FAST‑NUCES Karachi Campus – CS‑3009 Software Engineering course
-- Instructors: Dr. Sobia Iftikhar
-- Project members: Zubair Ahmed (23K‑0907), Aaqib Zahid (23K‑0681), Muhammad Fareed (23I‑2632)
-
----
-
-**Built with .NET 8, Oracle Database, and a lot of `Stopwatch` measurements.**  
 *Performance results vary; run the benchmarks on your own machine to see the improvements.*
 ```
-
-This README gives a complete overview, setup instructions, and API reference without embedding specific timing data. You can adjust the connection string details and folder paths to match your actual environment.
