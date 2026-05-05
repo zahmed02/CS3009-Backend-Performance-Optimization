@@ -50,12 +50,6 @@ OracleDemo/
   - Thunder Client (optional, for manual testing)
 - **Node.js** (v20+): only for building the frontend
 
-> **Environment variables** (set in Windows User variables)
-> - `DOTNET_ROOT` → `D:\DevTools\dotnet`
-> - `DOTNET_TOOLS_DIR` → `D:\DevTools\dotnet-tools`
-> - `NUGET_PACKAGES` → `D:\DevTools\dotnet\.nuget\packages`
-> - Path: add `D:\DevTools\dotnet-tools` and remove `C:\Users\yourname\.dotnet\tools`
-
 ## Setup Instructions
 
 ### 1. Clone the Repository
@@ -211,3 +205,86 @@ To modify the frontend, edit the files in `frontend/app` and rebuild.
 
 ## Dependencies
 
+### Environment Variables (User Variables)
+
+| Variable            | Value                                           | Purpose                                   |
+|---------------------|-------------------------------------------------|-------------------------------------------|
+| `DOTNET_ROOT`       | `D:\DevTools\dotnet`                            | Points to .NET SDK installation           |
+| `DOTNET_TOOLS_DIR`  | `D:\DevTools\dotnet-tools`                      | Stores global .NET tools                  |
+| `NUGET_PACKAGES`    | `D:\DevTools\dotnet\.nuget\packages`            | Cache for NuGet packages                  |
+| `Path (user)`       | Added `D:\DevTools\dotnet-tools` ; removed `C:\Users\zubai\.dotnet\tools` | Ensures tools on D: drive are found first |
+
+### .NET SDK
+
+- **Version:** 8.0.412
+- **Location:** `D:\DevTools\dotnet`
+- **Installation:** Official installer with custom path
+- **Download:** [dotnet.microsoft.com/en-us/download/dotnet/8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+
+### Global .NET Tools
+
+| Tool                  | Version   | Location                       |
+|-----------------------|-----------|--------------------------------|
+| `dotnet-ef` (EF Core) | 8.0.13    | `D:\DevTools\dotnet-tools`     |
+| `dotnet-script`       | latest    | `D:\DevTools\dotnet-tools`     |
+
+**Installed with:**
+```bash
+dotnet tool install --global dotnet-ef --version 8.0.13
+```
+
+### NuGet Packages (for `OracleDemo` project)
+
+All packages added inside `D:\DevTools\dotnet-projects\OracleDemo`:
+
+```bash
+dotnet add package Oracle.EntityFrameworkCore --version 8.23.60
+dotnet add package Microsoft.EntityFrameworkCore.Tools --version 8.0.13
+dotnet add package Microsoft.EntityFrameworkCore.Design --version 8.0.13
+```
+
+Packages are stored in `D:\DevTools\dotnet\.nuget\packages`.
+
+### VS Code Extensions
+
+| Extension                         | Publisher | Installed |
+|-----------------------------------|-----------|-----------|
+| C# Dev Kit                        | Microsoft | ✅        |
+| Oracle Developer Tools for VSCode | Oracle    | ✅        |
+| Thunder Client                    | Ranga Vadhineni | ✅  |
+
+Installed via Extensions panel (`Ctrl+Shift+X`).
+
+### Oracle Database
+
+- **Edition:** Oracle Database 21c XE
+- **Location:** `D:\Oracle\app\zubai\product\21c`
+- **Service Name:** `XEPDB1`
+- **User / Password:** `zubair` / `abc123`
+- **Sample schema:** `hr` (loaded for practice)
+
+### Commands Run (with Locations)
+
+| Command                                                                 | Location                                           |
+|-------------------------------------------------------------------------|----------------------------------------------------|
+| `cd D:\DevTools\dotnet-projects`                                        | D:\DevTools\dotnet-projects                        |
+| `dotnet new webapi -n OracleDemo`                                      | D:\DevTools\dotnet-projects                        |
+| `cd OracleDemo`                                                         | D:\DevTools\dotnet-projects\OracleDemo             |
+| `code .`                                                                | D:\DevTools\dotnet-projects\OracleDemo             |
+| `dotnet add package Oracle.EntityFrameworkCore --version 8.23.60`      | same                                               |
+| `dotnet add package Microsoft.EntityFrameworkCore.Tools --version 8.0.13` | same                                           |
+| `dotnet add package Microsoft.EntityFrameworkCore.Design --version 8.0.13` | same                                         |
+| `mkdir Models`, `mkdir Data`                                            | same                                               |
+| `code Models\Product.cs` etc.                                           | same                                               |
+| `dotnet ef migrations add InitialCreate`                                | same                                               |
+| `dotnet ef database update`                                             | same                                               |
+| `dotnet ef migrations add AddIndexOnProductName` (Step 1)              | same                                               |
+| `dotnet ef database update`                                             | same                                               |
+| `dotnet ef migrations add UseLongRowVersion` (Step 3)                  | same                                               |
+| `dotnet ef database update`                                             | same                                               |
+| `dotnet run`                                                            | same                                               |
+
+**Additional controllers (no terminal commands):**
+- `IndexingDemoController.cs`
+- `QueryOptimizationController.cs` (Step 2 – code only)
+- `ConcurrencyDemoController.cs`
