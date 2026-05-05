@@ -1,8 +1,6 @@
 
 # CS3009 Backend Performance Optimization
-
 ## Course Instructor & Project Supervisor: Dr. Sobia Iftikhar
-
 ## Semester & Section: BS(CS)-6A (SP26)
 
 ## Project Description:
@@ -210,4 +208,6 @@ The frontend is a **static Next.js** application (TypeScript, Tailwind CSS). Aft
 To modify the frontend, edit the files in `frontend/app` and rebuild.
 
 *Performance results vary; run the benchmarks on your own machine to see the improvements.*
-```
+
+## Dependencies
+
