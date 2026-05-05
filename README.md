@@ -156,11 +156,17 @@ All endpoints are under `http://localhost:8080/api/`
 
 ### Concurrency Handling (Optimistic)
 
-| Method | Endpoint                              | Description                                         |
-|--------|---------------------------------------|-----------------------------------------------------|
-| GET    | `/api/concurrencydemo/{id}`           | Fetch product (includes current rowVersion)        |
-| PUT    | `/api/concurrencydemo/{id}`           | Update – checks rowVersion, increments on success  |
-| POST   | `/api/concurrencydemo/simulate-race`  | Simulates two concurrent updates (one wins)        |
+| Method | Endpoint                              | Description                                         |Supporting Info                                        |Supporting Info                                        |
+|--------|---------------------------------------|-----------------------------------------------------|                                       |Supporting Info                                        |
+| GET    | `/api/concurrencydemo/{id}`           | Fetch product (includes current rowVersion)        |                                        |Supporting Info                                        |
+| PUT    | `/api/concurrencydemo/{id}`           | Update – checks rowVersion, increments on success  |Content-Type: application/json|      {
+       "productId": 279,
+       "productName": "Updated By A",
+       "price": 1999.99,
+       "createdDate": "2026-04-15T09:22:12",
+       "rowVersion": 0
+     } |
+| POST   | `/api/concurrencydemo/simulate-race`  | Simulates two concurrent updates (one wins)        |                                          |Supporting Info                                        |
 
 ### Async vs Multithreading
 
@@ -247,11 +253,11 @@ Packages are stored in `D:\DevTools\dotnet\.nuget\packages`.
 
 ### VS Code Extensions
 
-| Extension                         | Publisher | Installed |
-|-----------------------------------|-----------|-----------|
-| C# Dev Kit                        | Microsoft | ✅        |
-| Oracle Developer Tools for VSCode | Oracle    | ✅        |
-| Thunder Client                    | Ranga Vadhineni | ✅  |
+| Extension                         | Publisher |
+|-----------------------------------|-----------|
+| C# Dev Kit                        | Microsoft |
+| Oracle Developer Tools for VSCode | Oracle    |
+| Thunder Client                    | Ranga Vadhineni |
 
 Installed via Extensions panel (`Ctrl+Shift+X`).
 
