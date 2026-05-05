@@ -1,0 +1,90 @@
+@startuml
+!theme plain
+title Sequence Diagram – Query Optimization Benchmarking
+
+actor "User / Thunder Client" as User
+participant "QueryOptimizationController" as Controller
+participant "BenchmarkService (Singleton)" as Benchmark
+database "Oracle Database" as DB
+
+' ========== PROJECTION COMPARISON ==========
+User -> Controller: GET /projection
+activate Controller
+
+Controller -> Controller: Start Stopwatch
+Controller -> DB: SELECT * FROM PRODUCTS (full entity)
+DB --> Controller: 10,003 rows
+Controller -> Controller: Stopwatch → fullTime = 1875ms
+
+Controller -> Controller: Restart Stopwatch
+Controller -> DB: SELECT ProductId, ProductName, Price (projection)
+DB --> Controller: 10,003 rows (only 3 columns)
+Controller -> Controller: Stopwatch → projectionTime = 181ms
+
+Controller -> Benchmark: RecordMeasurement("projection-full", 1875)
+Controller -> Benchmark: RecordMeasurement("projection-fast", 181)
+
+Controller --> User: { fullTime, projectionTime, improvement: "90.35%" }
+deactivate Controller
+
+' ========== TRACKING vs NOTRACKING ==========
+User -> Controller: GET /tracking
+activate Controller
+
+Controller -> Controller: Start Stopwatch
+Controller -> DB: SELECT * FROM PRODUCTS (with tracking)
+DB --> Controller: 10,003 rows
+Controller -> Controller: trackingTime = 438ms
+
+Controller -> Controller: Restart Stopwatch
+Controller -> DB: SELECT * FROM PRODUCTS (AsNoTracking)
+DB --> Controller: 10,003 rows
+Controller -> Controller: noTrackingTime = 168ms
+
+Controller -> Benchmark: RecordMeasurement("tracking-enabled", 438)
+Controller -> Benchmark: RecordMeasurement("tracking-disabled", 168)
+
+Controller --> User: { trackingTime, noTrackingTime, improvement: "61.64%" }
+deactivate Controller
+
+' ========== LINQ vs RAW SQL ==========
+User -> Controller: GET /linq-vs-sql
+activate Controller
+
+Controller -> Controller: Start Stopwatch
+Controller -> DB: EF Core translates LINQ to SQL
+DB --> Controller: results
+Controller -> Controller: linqTime = 256ms
+
+Controller -> Controller: Restart Stopwatch
+Controller -> DB: SELECT * FROM PRODUCTS WHERE PRODUCT_NAME LIKE 'A%' (raw SQL)
+DB --> Controller: results
+Controller -> Controller: sqlTime = 31ms
+
+Controller -> Benchmark: RecordMeasurement("linq", 256)
+Controller -> Benchmark: RecordMeasurement("raw-sql", 31)
+
+Controller --> User: { linqTime, sqlTime, improvement: "87.89%" }
+deactivate Controller
+
+' ========== CONTAINS vs LIKE ==========
+User -> Controller: GET /contains-vs-like
+activate Controller
+
+Controller -> Controller: Start Stopwatch
+Controller -> DB: WHERE CONTAINS('a') → full table scan
+DB --> Controller: results
+Controller -> Controller: containsTime = 27ms
+
+Controller -> Controller: Restart Stopwatch
+Controller -> DB: WHERE LIKE 'A%' → uses index
+DB --> Controller: results
+Controller -> Controller: likeTime = 4ms
+
+Controller -> Benchmark: RecordMeasurement("contains", 27)
+Controller -> Benchmark: RecordMeasurement("like-prefix", 4)
+
+Controller --> User: { containsTime, likeTime, improvement: "85.19%" }
+deactivate Controller
+
+@enduml

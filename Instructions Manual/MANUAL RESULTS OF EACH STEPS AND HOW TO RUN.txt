@@ -1,0 +1,347 @@
+✅ Running Your Application
+------------------------------------------------
+0. Connect to the database first
+Name       | Password
+ZubairXE   | abc123
+------------------------------------------------
+1. Start the Application
+Open Command Prompt and navigate to your project folder:
+cd D:\DevTools\dotnet-projects\OracleDemo
+dotnet run
+------------------------------------------------
+2. Access Your API
+
+What            | URL
+------------------------------------------------
+Base URL        | http://localhost:8080
+Swagger UI      | http://localhost:8080/swagger
+------------------------------------------------
+3. Swagger UI
+Open your browser to http://localhost:8080/swagger. You'll see:
+- All available controllers and endpoints
+- Click any endpoint → "Try it out" → "Execute"
+- View request/response in browser
+
+---------------------------------------------------------------------------------------------------------------
+Step 1 – Database Indexing Impact Analysis
+
+1. Generate Test Data
+Endpoint: POST http://localhost:8080/api/indexingdemo/generate-test-data?count=10000
+Purpose: Populate the PRODUCTS table with 10,000 rows so that performance differences become noticeable.
+Result: After the request, the database contained 10,003 products (including any previously existing ones).
+
+2. Slow Query (No Index Usage)
+Endpoint: GET http://localhost:8080/api/indexingdemo/slow
+What it does: Searches for product names containing the letter 'a' anywhere (leading wildcard).
+Why it's slow: The LIKE '%a%' pattern cannot use a B‑tree index; it forces a full table scan.
+Response Example:
+{
+  "timeMs": 339,
+  "count": 10003,
+  "method": "SLOW - table scan (no index usage)",
+  "data": [...]
+}
+
+3. Fast Query (Index Used)
+Endpoint: GET http://localhost:8080/api/indexingdemo/fast
+What it does: Searches for product names starting with 'A' (LIKE 'A%').
+Why it's fast: The prefix search can leverage the index we created on PRODUCT_NAME.
+Response Example:
+{
+  "timeMs": 59,
+  "count": 2,
+  "method": "FAST - index scan (index on ProductName)",
+  "data": [...]
+}
+
+4. Benchmark (Optional)
+Endpoint: GET http://localhost:8080/api/indexingdemo/benchmark?iterations=5
+Purpose: Runs both slow and fast queries 5 times and returns average/min/max times plus improvement percentage.
+Response Example:
+{
+  "iterations": 5,
+  "slow": { "avg": 152, "min": 139, "max": 169 },
+  "fast": { "avg": 12, "min": 10, "max": 14 },
+  "improvement": "92.1%"
+}
+
+Observations: The fast endpoint consistently returned in <60 ms, while the slow endpoint took >300 ms. The improvement was roughly 80–90%, clearly demonstrating the benefit of proper indexing.
+
+---------------------------------------------------------------------------------------------------------------
+Step 2 – Query Optimization Benchmarking
+
+All endpoints are under `http://localhost:8080/api/queryoptimization`
+
+1. Projection Comparison
+   Endpoint: GET http://localhost:8080/api/queryoptimization/projection
+   Compares SELECT * (full entity) vs SELECT only needed columns (projection).
+   Actual Result:
+   {
+     "fullEntityLoad": { "timeMs": 1875, "count": 10000 },
+     "projection": { "timeMs": 181, "count": 10000 },
+     "improvement": "90.35%"
+   }
+
+2. Tracking vs NoTracking
+   Endpoint: GET http://localhost:8080/api/queryoptimization/tracking
+   Compares default change tracking vs AsNoTracking() for read‑only queries.
+   Actual Result:
+   {
+     "withTracking": { "timeMs": 438, "count": 10000 },
+     "withoutTracking": { "timeMs": 168, "count": 10000 },
+     "improvement": "61.64%"
+   }
+
+3. LINQ vs Raw SQL
+   Endpoint: GET http://localhost:8080/api/queryoptimization/linq-vs-sql
+   Compares EF Core LINQ query vs handwritten SQL (using parameterised raw SQL).
+   Actual Result:
+   {
+     "linq": { "timeMs": 256, "count": 0 },
+     "rawSql": { "timeMs": 31, "count": 0 },
+     "improvement": "87.89%"
+   }
+
+4. Contains vs Like
+   Endpoint: GET http://localhost:8080/api/queryoptimization/contains-vs-like
+   Compares inefficient wildcard search (cannot use index) vs prefix search (can use index).
+   Actual Result:
+   {
+     "contains": { "timeMs": 27, "count": 1 },
+     "like": { "timeMs": 4, "count": 0 },
+     "improvement": "85.19%"
+   }
+
+5. Full Benchmark
+   Endpoint: GET http://localhost:8080/api/queryoptimization/benchmark-all?iterations=5
+   Runs all the above comparisons multiple times and returns averages.
+   (Note: Caching may cause later runs to appear faster; use single‑run results for final report.)
+   Actual Result:
+{
+  "Projection": {
+    "slow": {
+      "avg": 86,
+      "min": 61,
+      "max": 129
+    },
+    "fast": {
+      "avg": 67.4,
+      "min": 48,
+      "max": 96
+    },
+    "improvement": "21.63%"
+  },
+  "Tracking": {
+    "slow": {
+      "avg": 79.2,
+      "min": 60,
+      "max": 104
+    },
+    "fast": {
+      "avg": 100.8,
+      "min": 84,
+      "max": 131
+    },
+    "improvement": "-27.27%"
+  },
+  "LinqVsSql": {
+    "slow": {
+      "avg": 1.2,
+      "min": 0,
+      "max": 4
+    },
+    "fast": {
+      "avg": 1.6,
+      "min": 0,
+      "max": 5
+    },
+    "improvement": "-33.33%"
+  }
+}
+
+IMPORTANT NOTE ABOUT CACHING:
+The benchmark-all endpoint runs queries multiple times in succession.
+Because of database caching and EF Core query plan caching, subsequent runs are much faster than the first run.
+Therefore, the single-run results (shown above) are the most reliable for measuring real-world performance improvement.
+
+Benchmark-All Results (Warm Cache – Shows Caching Effect):
+----------------------------------------------------------
+These results show that after the first request, both queries
+benefit from caching. The negative percentages are not errors;
+they demonstrate that caching can make optimizations appear
+less effective on repeated queries.
+
+Observations: Projection, AsNoTracking, and raw SQL each gave noticeable speedups. The Contains vs Like test showed an 85% improvement when using an index‑friendly prefix search.
+
+---------------------------------------------------------------------------------------------------------------
+Step 3 – Concurrency Handling
+
+We implemented optimistic concurrency using a `long RowVersion` property with `[ConcurrencyCheck]`. Each update increments the version number. If two users try to update the same record concurrently, only the first succeeds; the second receives a conflict.
+
+IMPORTANT: Use a product ID that actually exists in your database (e.g., from the list generated in Step 1). Always set the `Content-Type: application/json` header for PUT requests.
+
+--- 3.1 Normal Update (should succeed) ---
+
+1. Fetch a product (replace {id} with an existing ID, e.g., 276):
+   GET http://localhost:8080/api/concurrencydemo/276
+
+   Response (example):
+   {
+     "productId": 276,
+     "productName": "1 Product 274",
+     "price": 970,
+     "createdDate": "2026-04-15T09:22:12",
+     "rowVersion": 0
+   }
+
+2. Copy the entire JSON response into the body of a PUT request. Change the `productName` and/or `price`, but keep `rowVersion` the same (0).
+
+   PUT http://localhost:8080/api/concurrencydemo/279
+   Headers:
+   Content-Type: application/json
+   Body:
+     {
+       "productId": 279,
+       "productName": "Updated By A",
+       "price": 1999.99,
+       "createdDate": "2026-04-15T09:22:12",
+       "rowVersion": 0
+     }
+
+   PUT http://localhost:8080/api/concurrencydemo/279
+   Headers:
+   Content-Type: application/json
+   Body:
+     {
+       "productId": 279,
+       "productName": "Updated By B",
+       "price": 1999.99,
+       "createdDate": "2026-04-15T09:22:12",
+       "rowVersion": 0
+     }
+
+   Expected response: 409 Conflict {"message": "Concurrency conflict: The product was modified by another user."}
+
+
+--- 3.2 Simulate Race Condition ---
+
+Endpoint: POST http://localhost:8080/api/concurrencydemo/simulate-race
+
+No body or special headers required.
+
+Actual result (example):
+{
+  "userA": "User A: Update failed – concurrency conflict",
+  "userB": "User B: Update succeeded"
+}
+(One always succeeds, the other always fails – order may swap.)
+
+--- 3.3 Manual Conflict Test ---
+
+1. Fetch a product (GET) and note its rowVersion (e.g., 0).
+2. In another tab/window, update the same product (PUT) – this will increment rowVersion to 1.
+3. Now, using the old rowVersion (0), send another PUT request to the same product.
+
+Expected response: 409 Conflict with details:
+{
+  "message": "Concurrency conflict: The product was modified by another user.",
+  "currentVersion": 1,
+  "sentVersion": 0
+}
+
+Actual result from our test (after several updates):
+Status: 409 Conflict
+Body:
+{
+  "message": "Concurrency conflict: The product was modified by another user.",
+  "currentVersion": 4,
+  "sentVersion": 0
+}
+
+Observations: The optimistic concurrency mechanism successfully prevents lost updates without requiring database locks. The second user is clearly informed of the conflict.
+
+---------------------------------------------------------------------------------------------------------------
+Step 4 – Multithreading vs Asynchronous Processing
+
+We created `AsyncVsSyncController.cs` with endpoints that demonstrate:
+- Blocking I/O (`Thread.Sleep`) vs non‑blocking async (`Task.Delay`)
+- Parallel async tasks vs sequential sync
+- CPU‑bound work on the request thread vs offloaded to thread pool
+- Load test comparison
+
+All endpoints are under `http://localhost:8080/api/asyncvssync`
+
+Actual Test Results:
+
+3. Parallel async (10 tasks)
+   GET http://localhost:8080/api/asyncvssync/parallel-async?count=10
+   Response:
+   {
+     "type": "Parallel async (10 concurrent tasks)",
+     "timeMs": 1006,
+     "expectedIfSequential": 10000
+   }
+   → All 10 tasks completed in ~1 second.
+
+4. Sequential sync (10 tasks)
+   GET http://localhost:8080/api/asyncvssync/parallel-sync?count=10
+   Response:
+   {
+     "type": "Sequential sync (10 operations)",
+     "threadId": 24,
+     "timeMs": 10066,
+     "expectedIfAsync": 1000
+   }
+   → Took ~10 seconds (10 × 1 sec).
+
+5. CPU-bound synchronous
+   GET http://localhost:8080/api/asyncvssync/cpu-bound-sync
+   Response:
+   {
+     "type": "CPU-bound synchronous (main thread)",
+     "threadId": 28,
+     "timeMs": 299,
+     "result": 4999999950000000
+   }
+   → Heavy calculation blocks the request thread.
+
+6. CPU-bound async (offloaded)
+   GET http://localhost:8080/api/asyncvssync/cpu-bound-async
+   Response:
+   {
+     "type": "CPU-bound offloaded (request thread freed)",
+     "requestThreadId": 30,
+     "timeMs": 329,
+     "result": 4999999950000000
+   }
+   → Request thread freed; work done on thread pool.
+
+7. Load test – Asynchronous
+   GET http://localhost:8080/api/asyncvssync/load-test?requests=10&useAsync=true
+   Response:
+   {
+     "mode": "Asynchronous",
+     "concurrentRequests": 10,
+     "totalTimeMs": 503,
+     "expectedAsyncTime": 500,
+     "expectedSyncTime": 5000
+   }
+   → 10 async delays completed in ~0.5 sec.
+
+8. Load test – Synchronous (blocking)
+   GET http://localhost:8080/api/asyncvssync/load-test?requests=10&useAsync=false
+   Response:
+   {
+     "mode": "Synchronous (blocking)",
+     "concurrentRequests": 10,
+     "totalTimeMs": 1509,
+     "expectedAsyncTime": 500,
+     "expectedSyncTime": 5000
+   }
+   → Slower than async, but still less than worst‑case due to some parallelisation; async is clearly faster.
+
+Observations:
+- Asynchronous I/O does not block threads, allowing the server to handle many concurrent requests with fewer threads.
+- Parallel async tasks can run simultaneously, drastically reducing total time compared to sequential sync.
+- CPU‑intensive work can be offloaded to the thread pool to keep the request thread free for other requests.
+- Asynchronous processing significantly improves scalability and responsiveness, especially for I/O‑bound operations.

@@ -1,0 +1,51 @@
+@startuml
+!theme plain
+title Class Diagram – Query Optimization Controller (Self-Contained)
+
+class QueryOptimizationController {
+    - _context: AppDbContext
+    + QueryOptimizationController(context: AppDbContext)
+    + CompareProjection(): Task<IActionResult>
+    + CompareTracking(): Task<IActionResult>
+    + CompareLinqVsSql(): Task<IActionResult>
+    + CompareContainsVsLike(): Task<IActionResult>
+    + BenchmarkAll(iterations: int): Task<IActionResult>
+    - RunComparison(iterations, slowFunc, fastFunc): Task<object>
+}
+
+class AppDbContext {
+    + Products: DbSet<Product>
+}
+
+class Product {
+    + ProductId: int
+    + ProductName: string
+    + Price: decimal
+    + CreatedDate: DateTime
+    + RowVersion: long
+}
+
+class BenchmarkService {
+    - static Instance: BenchmarkService
+    - _measurements: ConcurrentDictionary<string, List<long>>
+    + RecordMeasurement(testName: string, ms: long): void
+    + GetSummary(): Dictionary<string, object>
+}
+
+note top of QueryOptimizationController
+  Each endpoint uses Stopwatch to measure
+  execution time of different query strategies.
+  Results are sent to BenchmarkService.
+end note
+
+note top of BenchmarkService
+  Singleton pattern – collects all
+  performance measurements across
+  multiple API calls.
+end note
+
+QueryOptimizationController --> AppDbContext : uses
+AppDbContext --> Product : manages
+QueryOptimizationController --> BenchmarkService : records metrics
+
+@enduml

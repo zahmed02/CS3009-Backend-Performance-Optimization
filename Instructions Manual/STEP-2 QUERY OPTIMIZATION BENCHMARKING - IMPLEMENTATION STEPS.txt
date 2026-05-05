@@ -1,0 +1,24 @@
+// ============================================================================
+// QUERY OPTIMIZATION BENCHMARKING - IMPLEMENTATION STEPS
+// ============================================================================
+//
+// 2.1 Created QueryOptimizationController.cs with the following endpoints:
+//     - Projection comparison (full entity vs projection)
+//     - Tracking vs AsNoTracking
+//     - LINQ vs raw SQL
+//     - Contains vs Like
+//     - Benchmark-all (runs all tests multiple times)
+//
+// 2.2 Added necessary using statements and Stopwatch for timing.
+//
+// 2.3 Fixed raw SQL syntax error by using parameterised query:
+//     .FromSqlRaw("SELECT * FROM PRODUCTS WHERE PRODUCT_NAME LIKE {0}", searchTerm)
+//
+// 2.4 Tested each endpoint using Thunder Client and recorded results.
+//
+// 2.5 Commands run (inside project folder):
+//     (no new migrations needed; only controller code)
+//
+// 2.6 Results captured and added to the manual results file.
+//
+// ============================================================================

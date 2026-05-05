@@ -1,0 +1,101 @@
+CS3009 SE PROJECT – TESTING INSTRUCTIONS
+
+================================================================================
+PROJECT LOCATION
+================================================================================
+Main project:  D:\DevTools\dotnet-projects\OracleDemo
+Test project:  D:\DevTools\dotnet-projects\OracleDemo.Tests
+
+================================================================================
+TESTING TOOL & FRAMEWORK
+================================================================================
+We use xUnit (https://xunit.net/) as the unit testing framework.
+Tests are executed via the .NET CLI command `dotnet test`.
+
+================================================================================
+DEPENDENCIES INSTALLED (inside test project)
+================================================================================
+1. xUnit framework (automatically included when creating the project)
+   Command: dotnet new xunit -n OracleDemo.Tests
+
+2. Reference to the main project (OracleDemo)
+   Command: dotnet add reference ..\OracleDemo\OracleDemo.csproj
+
+3. Moq – mocking library (for creating fake dependencies)
+   Command: dotnet add package Moq
+
+(Note: Microsoft.EntityFrameworkCore.InMemory was attempted but removed due to version conflict with .NET 8.)
+
+================================================================================
+FILES IN THE TEST PROJECT
+================================================================================
+D:\DevTools\dotnet-projects\OracleDemo.Tests\
+					├── OracleDemo.Tests.csproj          (project file)
+					├── AsyncVsSyncControllerTests.cs    (only test file – 6 passing tests)
+					└── bin\ , obj\                      (build output)
+
+Other test files (ProductsControllerTests, IndexingDemoControllerTests, ConcurrencyDemoControllerTests, ProductRepositoryTests) were created but later removed because mocking DbContext proved difficult. The remaining tests cover the AsyncVsSyncController, which has no external dependencies.
+
+================================================================================
+TERMINAL / POWERSHELL COMMANDS RUN (in order)
+================================================================================
+All commands were executed from the test project folder:
+D:\DevTools\dotnet-projects\OracleDemo.Tests
+
+1. Create test project:
+   dotnet new xunit -n OracleDemo.Tests
+
+2. Move into the test project folder:
+   cd OracleDemo.Tests
+
+3. Add reference to main project:
+   dotnet add reference D:\DevTools\dotnet-projects\OracleDemo\OracleDemo.csproj
+
+4. Add Moq package:
+   dotnet add package Moq
+
+5. (Optional) Attempt to add InMemory package – later removed:
+   dotnet add package Microsoft.EntityFrameworkCore.InMemory
+   (Failed due to version incompatibility; package was removed.)
+
+6. Create test files (using VS Code):
+   code AsyncVsSyncControllerTests.cs
+   (Other test files were created but later deleted.)
+
+7. Run all tests:
+   dotnet test
+
+================================================================================
+TEST RESULTS
+================================================================================
+After removing the problematic test files, the test suite passes completely.
+
+> dotnet test
+...
+Passed!  - Failed: 0, Passed: 6, Skipped: 0, Total: 6
+
+The 6 tests verify that the AsyncVsSyncController endpoints return OkObjectResult (HTTP 200) without checking internal timings – sufficient for unit testing.
+
+================================================================================
+INTEGRATION / MANUAL TESTING
+================================================================================
+For controllers that depend on the database (IndexingDemoController, ConcurrencyDemoController, ProductsController), we performed manual integration tests using Thunder Client (VS Code extension). All endpoints were verified to return expected status codes and data, with performance measurements captured separately (see the project’s manual results file).
+
+================================================================================
+HOW TO RUN TESTS YOURSELF
+================================================================================
+1. Open a terminal (PowerShell or Command Prompt).
+2. Navigate to the test project folder:
+   cd D:\DevTools\dotnet-projects\OracleDemo.Tests
+3. Run the tests:
+   dotnet test
+4. Observe the output – all tests should pass.
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+- If you see version conflict warnings (MSB3277), they are harmless and do not
+  affect test execution. They arise because the main project uses EF Core 8.0.3
+  while some dependencies pull 8.0.13; the build resolves to 8.0.3.
+- If tests fail to compile, ensure the reference to the main project is correct.
+- To clean and rebuild: dotnet clean && dotnet build

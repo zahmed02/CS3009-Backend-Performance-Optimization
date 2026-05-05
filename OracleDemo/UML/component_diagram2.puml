@@ -1,6 +1,6 @@
 @startuml
 !theme plain
-title Component Diagram: Layered Architecture (4+1 View)
+title Component Diagram – Layered Architecture (4+1 View)
 
 ' === Define layers using packages with consistent styling ===
 package "Presentation Layer (Frontend)" {
@@ -70,12 +70,12 @@ note right of RepoInterface : Repository pattern\nAbstracts data access
 note bottom of EF : Unit of Work pattern\nTracks changes, commits transactions
 note bottom of DB : PRODUCTS table\nIndex on PRODUCT_NAME\nRowVersion column
 
-'=== Color coding layers (optional) ===
-'Uncomment if you want colors:
-'package Presentation Layer #LightBlue
-'package Application Layer #LightGreen
-'package Business Logic Layer #LightYellow
-'package Data Access Layer #LightCoral
-'database Database Layer #LightGray
+' === Color coding layers (optional) ===
+' Uncomment if you want colors:
+' package Presentation Layer #LightBlue
+' package Application Layer #LightGreen
+' package Business Logic Layer #LightYellow
+' package Data Access Layer #LightCoral
+' database Database Layer #LightGray
 
-@enduml
+@endumld

@@ -1,0 +1,133 @@
+CS3009 SE PROJECT – PATTERN TESTING INSTRUCTIONS (THUNDER CLIENT)
+
+Base URL: http://localhost:8080
+
+================================================================================
+1. REPOSITORY PATTERN (ProductsController)
+================================================================================
+
+All requests require header: Content-Type: application/json (except DELETE)
+
+-------------------------------------------------------------------------------
+1.1 GET all products
+-------------------------------------------------------------------------------
+Method: GET
+URL: http://localhost:8080/api/products
+Headers: (none needed)
+Body: (none)
+
+Expected: 200 OK with JSON array of products.
+
+-------------------------------------------------------------------------------
+1.2 GET single product by ID
+-------------------------------------------------------------------------------
+Method: GET
+URL: http://localhost:8080/api/products/{id}   (e.g., 10002)
+Headers: (none)
+Body: (none)
+
+Expected: 200 OK with product JSON (includes rowVersion).
+
+-------------------------------------------------------------------------------
+1.3 POST (create new product)
+-------------------------------------------------------------------------------
+Method: POST
+URL: http://localhost:8080/api/products
+Headers: Content-Type: application/json
+Body (raw JSON):
+{
+  "productName": "Test Product",
+  "price": 99.99,
+  "createdDate": "2026-04-17T10:00:00"
+}
+
+Expected: 201 Created with the created product (includes productId and rowVersion=0).
+
+-------------------------------------------------------------------------------
+1.4 PUT (update existing product)
+-------------------------------------------------------------------------------
+Method: PUT
+URL: http://localhost:8080/api/products/{id}   (use the productId from POST or GET)
+Headers: Content-Type: application/json
+Body (raw JSON) – copy from GET response, change productName/price, keep rowVersion:
+{
+  "productId": 10002,
+  "productName": "Updated Name",
+  "price": 149.99,
+  "createdDate": "2026-04-17T12:26:12.9123799",
+  "rowVersion": 0
+}
+
+Expected: 204 No Content (empty body). After update, GET again to see rowVersion incremented.
+
+-------------------------------------------------------------------------------
+1.5 DELETE (remove product)
+-------------------------------------------------------------------------------
+Method: DELETE
+URL: http://localhost:8080/api/products/{id}
+Headers: (none)
+Body: (none)
+
+Expected: 204 No Content (product removed).
+
+================================================================================
+2. STRATEGY PATTERN (IndexingDemoController)
+================================================================================
+
+These endpoints demonstrate different query algorithms at runtime.
+No headers or body required.
+
+-------------------------------------------------------------------------------
+2.1 Indexed strategy (uses index, prefix search)
+-------------------------------------------------------------------------------
+Method: GET
+URL: http://localhost:8080/api/indexingdemo/strategy/indexed
+
+Expected: 200 OK with timeMs, count, description.
+
+-------------------------------------------------------------------------------
+2.2 Non‑indexed strategy (table scan, leading wildcard)
+-------------------------------------------------------------------------------
+Method: GET
+URL: http://localhost:8080/api/indexingdemo/strategy/nonindexed
+
+Expected: 200 OK with timing.
+
+-------------------------------------------------------------------------------
+2.3 Raw SQL strategy
+-------------------------------------------------------------------------------
+Method: GET
+URL: http://localhost:8080/api/indexingdemo/strategy/rawsql
+
+Expected: 200 OK with timing.
+
+================================================================================
+3. SINGLETON PATTERN (BenchmarkService)
+================================================================================
+
+This endpoint returns aggregated metrics from all strategy calls.
+
+Method: GET
+URL: http://localhost:8080/api/indexingdemo/benchmark-summary
+
+Expected: 200 OK with JSON object containing average, min, max, count for each tested strategy.
+Call it after running the strategy endpoints to see accumulated data.
+
+================================================================================
+4. DEPENDENCY INJECTION & UNIT OF WORK
+================================================================================
+
+These patterns are implicit:
+- All controllers receive dependencies via constructor (no 'new' keyword).
+- DbContext acts as Unit of Work – changes are committed atomically with SaveChanges().
+
+No special endpoints needed. Verified by the fact that POST, PUT, DELETE work correctly.
+
+================================================================================
+TIPS
+================================================================================
+- Always add "Content-Type: application/json" header for POST and PUT requests.
+- For PUT, include the full product object as returned by GET (including rowVersion).
+- Use the productId from a successful POST or from the existing data.
+- After updating a product, GET it again to see rowVersion increment.
+- To test concurrency, try two PUT requests with the same old rowVersion – one will get 409 Conflict.

@@ -1,0 +1,112 @@
+Environment Variables We Set:
+
+Variable		| Value										| Where Set
+------------------------------------------------------------------------------------------------------------------------
+DOTNET_ROOT		| D:\DevTools\dotnet								| User variable
+DOTNET_TOOLS_DIR	| D:\DevTools\dotnet-tools							| User variable
+NUGET_PACKAGES		| D:\DevTools\dotnet\.nuget\packages						| User variable
+Path (user)		| Added D:\DevTools\dotnet-tools and removed C:\Users\zubai\.dotnet\tools	| User variable
+
+These were set via System Properties → Environment Variables (User variables). The Path modification was done to ensure the global tools on D: drive are found first.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Dependencies Installed (with Versions & Locations):
+.NET SDK
+Version: 8.0.412 
+
+Location: D:\DevTools\dotnet
+
+Installed via: official installer, custom path chosen.
+Downloaded from: https://dotnet.microsoft.com/en-us/download/dotnet/8.0
+File: dotnet-sdk-8.0.412-win-x64.exe (or similar)
+Installation path: D:\DevTools\dotnet
+When: At the very beginning of setup
+
+Global .NET Tools
+Tool						| 	Version		|	Location
+----------------------------------------------------------------------------------------------------------------------------
+dotnet-ef (Entity Framework Core)		| 	8.0.13		|	D:\DevTools\dotnet-tools
+dotnet-script (optional, not used in project)	| 	latest		|	D:\DevTools\dotnet-tools (installed earlier)
+
+Installed with:
+dotnet tool install --global dotnet-ef --version 8.0.13
+
+NuGet Packages (for OracleDemo project)
+All packages were added inside (D:\DevTools\dotnet-projects\OracleDemo) using the following commands:
+dotnet add package Oracle.EntityFrameworkCore --version 8.23.60
+dotnet add package Microsoft.EntityFrameworkCore.Tools --version 8.0.13
+dotnet add package Microsoft.EntityFrameworkCore.Design --version 8.0.13
+
+These packages are stored in D:\DevTools\dotnet\.nuget\packages.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+VS Code Extensions:
+
+Extension				| Publisher		| Installed?
+---------------------------------------------------------------------------------
+C# Dev Kit				| Microsoft		| ✅
+Oracle Developer Tools for VSCode	| Oracle		| ✅
+Thunder Client				| Ranga Vadhineni	| ✅
+SQL Server (mssql)			| Microsoft		| X (optional)
+
+All installed via the VS Code Extensions panel (Ctrl+Shift+X).
+
+Oracle Database
+Edition: Oracle Database 21c XE
+Location: D:\Oracle\app\zubai\product\21c
+Service Name: XEPDB1
+User: zubair with password abc123
+HR sample schema was loaded as a separate user (hr) for practice.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Commands Run (with Locations):
+
+Command										| 	Location (Directory)
+--------------------------------------------------------------------------------------------------------------------------------
+cd D:\DevTools\dotnet-projects							| 	D:\DevTools\dotnet-projects
+dotnet new webapi -n OracleDemo							| 	D:\DevTools\dotnet-projects
+cd OracleDemo									| 	D:\DevTools\dotnet-projects\OracleDemo
+code .										| 	D:\DevTools\dotnet-projects\OracleDemo
+dotnet add package Oracle.EntityFrameworkCore --version 8.23.60			| 	D:\DevTools\dotnet-projects\OracleDemo
+dotnet add package Microsoft.EntityFrameworkCore.Tools --version 8.0.13		| 	D:\DevTools\dotnet-projects\OracleDemo
+dotnet add package Microsoft.EntityFrameworkCore.Design --version 8.0.13	| 	D:\DevTools\dotnet-projects\OracleDemo
+mkdir Models									| 	D:\DevTools\dotnet-projects\OracleDemo
+mkdir Data									| 	D:\DevTools\dotnet-projects\OracleDemo
+code Models\Product.cs etc.							| 	D:\DevTools\dotnet-projects\OracleDemo
+dotnet ef migrations add InitialCreate						| 	D:\DevTools\dotnet-projects\OracleDemo
+dotnet ef database update							| 	D:\DevTools\dotnet-projects\OracleDemo
+
+# Indexing (Step 1)
+dotnet ef migrations add AddIndexOnProductName                			| 	D:\DevTools\dotnet-projects\OracleDemo
+dotnet ef database update                                     			| 	D:\DevTools\dotnet-projects\OracleDemo
+
+# Query Optimization (Step 2)
+(No terminal commands – only added QueryOptimizationController.cs)		|
+
+# Concurrency (Step 3)
+dotnet ef migrations add UseLongRowVersion                    			| 	D:\DevTools\dotnet-projects\OracleDemo
+dotnet ef database update           						| 	D:\DevTools\dotnet-projects\OracleDemo
+
+# Run the application
+dotnet run									| 	D:\DevTools\dotnet-projects\OracleDemo
+
+Later we created additional controllers (IndexingDemoController, QueryOptimizationController) and added migrations for indexes.
+
+Additional controllers created (no terminal commands):
+- IndexingDemoController.cs
+- QueryOptimizationController.cs ← Step 2 (code only, no commands)
+- ConcurrencyDemoController.cs
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Summary of Current Environment:
+- .NET SDK on D: drive.
+- All global tools on D: drive.
+- NuGet packages on D: drive.
+- Oracle Database on D: drive.
+- VS Code on D: drive (D:\Microsoft VS Code).
+- All project files in D:\DevTools\dotnet-projects\OracleDemo.
+- Two migrations applied (index on ProductName, RowVersion column).
+- Three demo controllers implemented (indexing, query optimization, concurrency).

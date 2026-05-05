@@ -1,0 +1,32 @@
+// ============================================================================
+// CONCURRENCY HANDLING - IMPLEMENTATION STEPS
+// ============================================================================
+//
+// 3.1 Modified Models/Product.cs: added a long RowVersion property with [ConcurrencyCheck].
+//     Removed the earlier [Timestamp] attribute because Oracle does not support it well.
+//
+// 3.2 Created a new migration to add the RowVersion column (long/NUMBER(19)):
+//     dotnet ef migrations add UseLongRowVersion
+//     dotnet ef database update
+//
+// 3.3 Created ConcurrencyDemoController.cs with:
+//     - GET /{id} to fetch a product
+//     - PUT /{id} to update (checks RowVersion, increments on success)
+//     - POST /simulate-race to launch two concurrent updates
+//
+// 3.4 In the PUT method, we manually compare the incoming RowVersion with the database version.
+//     If they match, we update and increment RowVersion. Otherwise, we return 409 Conflict.
+//
+// 3.5 The simulate-race endpoint uses IServiceScopeFactory to create fresh DbContext instances
+//     for each background task, simulating two separate users.
+//
+// 3.6 Tested with Thunder Client:
+//     - Normal update succeeded.
+//     - Race simulation returned one success and one conflict.
+//     - Manual conflict test returned 409.
+//
+// 3.7 Commands run:
+//     dotnet ef migrations add UseLongRowVersion
+//     dotnet ef database update
+//
+// ============================================================================

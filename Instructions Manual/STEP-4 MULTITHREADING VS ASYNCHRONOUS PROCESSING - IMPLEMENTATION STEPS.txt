@@ -1,0 +1,101 @@
+// ============================================================================
+// STEP 4 – MULTITHREADING vs ASYNCHRONOUS PROCESSING - IMPLEMENTATION STEPS
+// ============================================================================
+//
+// This step demonstrates the difference between synchronous (blocking) and
+// asynchronous (non-blocking) operations, as well as parallel execution.
+// We created a new controller `AsyncVsSyncController.cs` with multiple endpoints.
+//
+// ============================================================================
+// 4.1 Create the Controller
+// ============================================================================
+// File: Controllers/AsyncVsSyncController.cs
+//
+// The controller includes the following endpoints:
+//
+// 1. GET  /sync                – Synchronous I/O (Thread.Sleep, blocks thread)
+// 2. GET  /async               – Asynchronous I/O (Task.Delay, non-blocking)
+// 3. GET  /parallel-async      – Runs 10 async tasks concurrently
+// 4. GET  /parallel-sync       – Runs 10 sync tasks sequentially
+// 5. GET  /cpu-bound-sync      – Heavy CPU calculation on main thread
+// 6. GET  /cpu-bound-async     – Heavy CPU calculation offloaded to thread pool
+// 7. GET  /load-test           – Compares async vs sync for 10 concurrent requests
+//
+// (Full code is provided in the controller file – see source.)
+//
+// ============================================================================
+// 4.2 No New Migrations or NuGet Packages Required
+// ============================================================================
+// This step only adds a new controller – no database schema changes, so no
+// `dotnet ef` commands are needed. All required libraries are already present
+// (System.Diagnostics, System.Threading, Microsoft.AspNetCore.Mvc).
+//
+// ============================================================================
+// 4.3 Testing the Endpoints (using Thunder Client or browser)
+// ============================================================================
+// Run the application first:
+//     cd D:\DevTools\dotnet-projects\OracleDemo
+//     dotnet run
+//
+// Then test each endpoint (replace {port} with your actual port, e.g., 8080):
+//
+// 1. Synchronous I/O
+//    GET http://localhost:8080/api/asyncvssync/sync
+//    Expected: ~2000ms, thread blocked.
+//
+// 2. Asynchronous I/O
+//    GET http://localhost:8080/api/asyncvssync/async
+//    Expected: ~2000ms, thread freed.
+//
+// 3. Parallel Async (10 tasks)
+//    GET http://localhost:8080/api/asyncvssync/parallel-async?count=10
+//    Expected: ~1000ms (all tasks run concurrently).
+//
+// 4. Sequential Sync (10 tasks)
+//    GET http://localhost:8080/api/asyncvssync/parallel-sync?count=10
+//    Expected: ~10000ms (each blocks sequentially).
+//
+// 5. CPU-bound Sync
+//    GET http://localhost:8080/api/asyncvssync/cpu-bound-sync
+//    Expected: several hundred ms, uses request thread.
+//
+// 6. CPU-bound Async
+//    GET http://localhost:8080/api/asyncvssync/cpu-bound-async
+//    Expected: similar time, but request thread freed.
+//
+// 7. Load Test – Asynchronous
+//    GET http://localhost:8080/api/asyncvssync/load-test?requests=10&useAsync=true
+//    Expected: ~500ms.
+//
+// 8. Load Test – Synchronous
+//    GET http://localhost:8080/api/asyncvssync/load-test?requests=10&useAsync=false
+//    Expected: ~5000ms (or longer, depending on parallelism).
+//
+// ============================================================================
+// 4.4 Observed Results (from actual test run)
+// ============================================================================
+// - Sync I/O: 2010ms, thread 9 blocked
+// - Async I/O: 2015ms, thread 13 (different, freed during delay)
+// - Parallel async: 1006ms (10 tasks in ~1 sec)
+// - Sequential sync: 10066ms (10 tasks in ~10 sec)
+// - CPU-bound sync: 299ms on thread 28
+// - CPU-bound async: 329ms, request thread freed
+// - Load test async: 503ms
+// - Load test sync: 1509ms (slower than async)
+//
+// ============================================================================
+// 4.5 Key Takeaways
+// ============================================================================
+// - Asynchronous I/O does not block threads → better scalability.
+// - Parallel async tasks run concurrently, reducing total time.
+// - CPU‑intensive work can be offloaded to keep request threads free.
+// - For I/O-bound operations, async is vastly superior; for CPU-bound work,
+//   offloading still helps responsiveness.
+//
+// ============================================================================
+// 4.6 Commands Summary
+// ============================================================================
+// No terminal commands were needed for implementation. Only the controller
+// file was added. To run the tests, use the same `dotnet run` command as before.
+//
+// ============================================================================

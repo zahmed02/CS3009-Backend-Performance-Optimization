@@ -21,7 +21,7 @@ public class Product
   public DateTime CreatedDate { get; set; }
 
   // -------------------------------------------------------------------------
-  // Concurrency token – used for optimistic concurrency.
+  // Concurrency token: used for optimistic concurrency.
   // The [ConcurrencyCheck] attribute tells EF Core to include this column
   // in the WHERE clause of UPDATE and DELETE statements.
   // Every time a record is updated, we increment this number.

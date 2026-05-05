@@ -1,0 +1,52 @@
+CS3009 SE PROJECT – FRONTEND SETUP INSTRUCTIONS
+All commands were run in PowerShell at the specified locations.
+
+--------------------------------------------------------------------------------
+1. Create frontend folder inside the project root
+--------------------------------------------------------------------------------
+Location: D:\DevTools\dotnet-projects\OracleDemo
+Command: mkdir frontend
+
+--------------------------------------------------------------------------------
+2. Initialize Next.js app with TypeScript, Tailwind CSS, ESLint, App Router
+--------------------------------------------------------------------------------
+Location: D:\DevTools\dotnet-projects\OracleDemo\frontend
+Command: npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir=false --import-alias="@/*"
+
+--------------------------------------------------------------------------------
+3. Enable static HTML export (so that Next.js generates index.html)
+--------------------------------------------------------------------------------
+Location: D:\DevTools\dotnet-projects\OracleDemo\frontend
+Action: Created/updated next.config.js with:
+        output: "export"
+        images: { unoptimized: true }
+
+--------------------------------------------------------------------------------
+4. Build the frontend (produces static files in /out folder)
+--------------------------------------------------------------------------------
+Location: D:\DevTools\dotnet-projects\OracleDemo\frontend
+Command: npm run build
+
+--------------------------------------------------------------------------------
+5. Run the backend (serves frontend from frontend/out)
+--------------------------------------------------------------------------------
+Location: D:\DevTools\dotnet-projects\OracleDemo
+Command: dotnet run
+
+The backend now serves the frontend at http://localhost:8080
+(port 8080 was chosen because ports 5000‑5017 were excluded by Windows)
+
+--------------------------------------------------------------------------------
+6. Frontend dependencies (installed automatically by create-next-app)
+--------------------------------------------------------------------------------
+- next
+- react
+- react-dom
+- @tailwindcss/postcss
+- @types/node, @types/react, @types/react-dom
+- eslint, eslint-config-next
+- tailwindcss
+- typescript
+
+No manual code changes were made to the default page.tsx – it remains the Next.js welcome page.
+API calls (if needed later) will use environment variable NEXT_PUBLIC_API_URL=http://localhost:8080. THIS IS NOT DONE YET

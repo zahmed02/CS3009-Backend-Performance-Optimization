@@ -1,0 +1,102 @@
+@startuml
+!theme plain
+title Deployment Diagram – Backend Performance Optimization System
+
+' === Define nodes (physical hardware/devices) ===
+node "Developer Machine (Windows 10/11)" as DevMachine {
+    
+    ' === Software environment inside the node ===
+    rectangle "Operating System: Windows 10/11" as OS
+    
+    node "ASP.NET Core Runtime (.NET 8)" as DotNetRuntime {
+        
+        artifact "OracleDemo.dll" as BackendArtifact
+        artifact "OracleDemo.exe" as BackendExe
+        
+        component "Kestrel Web Server" as Kestrel {
+            artifact "Program.cs (compiled)"
+            artifact "Controllers/*.cs"
+            artifact "Repositories/*.cs"
+            artifact "Strategies/*.cs"
+            artifact "Services/*.cs"
+        }
+    }
+    
+    node "Oracle Database 21c XE" as OracleNode {
+        database "PRODUCTS Table" as ProductsTable
+        database "Index: IX_PRODUCTS_NAME" as ProductIndex
+        database "RowVersion Column" as RowVersionCol
+        artifact "Oracle Service (listening on port 1521)" as OracleService
+    }
+    
+    node "Static File Server (ASP.NET Core)" as StaticServer {
+        artifact "Next.js Static Export (frontend/out/)" as FrontendArtifact {
+            file "index.html"
+            file "*.css"
+            file "*.js"
+        }
+    }
+    
+    node "VS Code IDE" as VSCode {
+        artifact "C# Dev Kit Extension" as CSharpExt
+        artifact "Thunder Client Extension" as ThunderExt
+        artifact "Oracle Developer Tools Extension" as OracleExt
+        artifact "PlantUML Extension" as PlantUMLExt
+    }
+}
+
+' === Optional external client for load testing ===
+node "External Client (Another PC / Browser)" as ExternalClient {
+    artifact "Web Browser (Chrome/Firefox)" as Browser
+    artifact "Thunder Client (if installed)" as ExternalThunder
+}
+
+' === Communication links ===
+
+' Internal to Developer Machine
+DevMachine --> DevMachine : Localhost (no network)
+
+' Backend communicates with Oracle
+BackendArtifact -down-> OracleService : TCP/IP Port 1521\n(Oracle SQL*Net protocol)
+
+' Backend serves static files
+Kestrel -down-> StaticServer : HTTP on Port 8080\n(Serves index.html, CSS, JS)
+
+' External client communication
+ExternalClient --> Kestrel : HTTP Requests\n(GET /api/... , POST /simulate-race)\nPort 8080
+
+' External client can also access static frontend
+ExternalClient --> StaticServer : HTTP GET /\n(Port 8080)
+
+' === Notes for explanation ===
+note right of DevMachine
+  All components run on the same physical machine.
+  Ports used:
+  - Backend API: 8080 (HTTP)
+  - Oracle Database: 1521
+  - HTTPS is disabled for demo (can be enabled)
+end note
+
+note bottom of ExternalClient
+  Optional – used to simulate multiple concurrent users.
+  Can be a second PC, a mobile device, or another browser tab.
+end note
+
+note right of OracleNode
+  Oracle Database 21c XE is installed on D:\Oracle\...
+  Service Name: XEPDB1
+  User: zubair
+  Password: abc123
+end note
+
+note left of StaticServer
+  Next.js frontend is built with "output: export"
+  All files are static – no server-side Node.js needed.
+  Served directly by ASP.NET Core.
+end note
+
+' === Show hardware constraints ===
+artifact "Hardware: Intel CPU, 8GB+ RAM, 10GB+ free disk" as Hardware
+Hardware -up-> DevMachine : runs on
+
+@enduml
