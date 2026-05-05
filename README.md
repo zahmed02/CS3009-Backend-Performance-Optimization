@@ -2,7 +2,6 @@
 # CS3009 Backend Performance Optimization
 ## Course: CS3009 Software Engineering
 ## Instructor & Project Supervisor: Dr. Sobia Iftikhar
-## Semester & Section: BS(CS)-6A (SP26)
 
 ## Project Description:
 **ASP.NET Core 8 Web API** demonstrating four key backend optimization techniques using **Entity Framework Core** and **Oracle Database 21c XE**.
