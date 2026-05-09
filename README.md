@@ -1,5 +1,4 @@
-
-# CS3009 Backend Performance Optimization
+# Backend Performance Optimization
 ## Course: CS3009 Software Engineering
 ## Instructor: Dr. Sobia Iftikhar
 
